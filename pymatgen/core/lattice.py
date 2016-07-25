@@ -665,7 +665,8 @@ class Lattice(MSONable):
         Returns:
             Niggli-reduced lattice.
         """
-        matrix = self._matrix.copy()
+        # lll reduction is more stable for skewed cells
+        matrix = self.get_lll_reduced_lattice().matrix
         a = matrix[0]
         b = matrix[1]
         c = matrix[2]
@@ -917,7 +918,7 @@ class Lattice(MSONable):
             else:
                 fcoords, dists, inds
         """
-        recp_len = np.array(self.reciprocal_lattice_crystallographic.abc)
+        recp_len = np.array(self.reciprocal_lattice.abc) / (2 * pi)
         nmax = float(r) * recp_len + 0.01
 
         pcoords = self.get_fractional_coords(center)
