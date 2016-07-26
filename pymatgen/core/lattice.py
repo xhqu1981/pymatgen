@@ -976,11 +976,7 @@ class Lattice(MSONable):
         fcoords1 = np.mod(fcoords1, 1)
         fcoords2 = np.mod(fcoords2, 1)
 
-        # create images of f2
-        n = []
-        for f1, f2 in itertools.product(fcoords1, fcoords2):
-            n.append(self._get_mic_range(f1, f2))
-        n = np.max(np.array(n), axis=0)
+        n = self._get_mic_range(fcoords1, fcoords2)
         ranges = [list(range(-i, i + 1)) for i in n]
         images = np.array(list(itertools.product(*ranges)))
         shifted_f2 = fcoords2[:, None, :] + images[None, :, :]
@@ -1088,18 +1084,23 @@ class Lattice(MSONable):
             self._diags = np.sqrt((np.dot([[1, 1, 1], [-1, 1, 1], [1, -1, 1],
                                      [-1, -1, 1],
                                      ], self._matrix) ** 2).sum(1))
-        d = pbc_diff(fcoords1, fcoords2)
-        d = dot(d, self._matrix)
-        d = np.sqrt((d ** 2).sum())
+
+        vecs = np.vstack(fcoords1[:, None] - fcoords2[None, :])
+        vecs = vecs - np.round(vecs)
+
+        d = dot(vecs, self._matrix)
+        d = np.sqrt(np.sum(d ** 2, axis=1))
+        d = np.max(d)
 
         cutoff = min(d, max(self._diags) / 2)
         n = np.array(np.ceil(cutoff * np.prod(self._lengths) /
                              (self.volume * self._lengths)), dtype=int)
         if any(n > 50):
             warnings.warn("Cell is highly skewed and requires a search "
-                          "through image range %s. For efficiency, "
+                          "through image range of +- %s. For efficiency, "
                           "we will limit the search to +-50 images in each "
-                          "direction. Recommend you do a proper niggli or LLL"
-                          "reduction of the cell before computing distances" % n)
+                          "direction. Recommend you do a niggli or LLL "
+                          "reduction of the cell before computing distances"
+                          % n)
             n = np.minimum(n, 50)
         return n
