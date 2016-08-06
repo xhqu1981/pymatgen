@@ -3,6 +3,18 @@
 # Distributed under the terms of the MIT License.
 
 from __future__ import division, unicode_literals
+import logging
+
+from pymatgen.analysis.bond_valence import BVAnalyzer
+from pymatgen.analysis.ewald import EwaldSummation, EwaldMinimizer
+from pymatgen.analysis.elasticity.strain import Deformation
+from pymatgen.core.composition import Composition
+from pymatgen.core.operations import SymmOp
+from pymatgen.core.periodic_table import get_el_sp
+from pymatgen.core.structure import Structure
+from pymatgen.transformations.site_transformations import \
+    PartialRemoveSitesTransformation
+from pymatgen.transformations.transformation_abc import AbstractTransformation
 
 """
 This module defines standard transformations which transforms a structure into
@@ -20,47 +32,7 @@ __email__ = "shyuep@gmail.com"
 __date__ = "Sep 23, 2011"
 
 
-import logging
-
-from pymatgen.analysis.bond_valence import BVAnalyzer
-from pymatgen.analysis.ewald import EwaldSummation, EwaldMinimizer
-from pymatgen.analysis.elasticity.strain import Deformation
-from pymatgen.core.composition import Composition
-from pymatgen.core.operations import SymmOp
-from pymatgen.core.periodic_table import get_el_sp
-from pymatgen.core.structure import Structure
-from pymatgen.transformations.site_transformations import \
-    PartialRemoveSitesTransformation
-from pymatgen.transformations.transformation_abc import AbstractTransformation
-
 logger = logging.getLogger(__name__)
-
-
-class IdentityTransformation(AbstractTransformation):
-    """
-    This is a demo transformation which does nothing, i.e. just returns a copy
-    of the same structure.
-    """
-    def __init__(self):
-        pass
-
-    def apply_transformation(self, structure):
-        return Structure(structure.lattice, structure.species_and_occu,
-                         structure.frac_coords)
-
-    def __str__(self):
-        return "Identity Transformation"
-
-    def __repr__(self):
-        return self.__str__()
-
-    @property
-    def inverse(self):
-        return self
-
-    @property
-    def is_one_to_many(self):
-        return False
 
 
 class RotationTransformation(AbstractTransformation):
@@ -78,11 +50,11 @@ class RotationTransformation(AbstractTransformation):
         """
 
         """
-        self._axis = axis
-        self._angle = angle
-        self._angle_in_radians = angle_in_radians
+        self.axis = axis
+        self.angle = angle
+        self.angle_in_radians = angle_in_radians
         self._symmop = SymmOp.from_axis_angle_and_translation(
-            self._axis, self._angle, self._angle_in_radians)
+            self.axis, self.angle, self.angle_in_radians)
 
     def apply_transformation(self, structure):
         s = structure.copy()
@@ -92,16 +64,16 @@ class RotationTransformation(AbstractTransformation):
     def __str__(self):
         return "Rotation Transformation about axis " + \
                "{} with angle = {:.4f} {}".format(
-                   self._axis, self._angle,
-                   "radians" if self._angle_in_radians else "degrees")
+                   self.axis, self.angle,
+                   "radians" if self.angle_in_radians else "degrees")
 
     def __repr__(self):
         return self.__str__()
 
     @property
     def inverse(self):
-        return RotationTransformation(self._axis, -self._angle,
-                                      self._angle_in_radians)
+        return RotationTransformation(self.axis, -self.angle,
+                                      self.angle_in_radians)
 
     @property
     def is_one_to_many(self):
@@ -118,11 +90,11 @@ class OxidationStateDecorationTransformation(AbstractTransformation):
     """
 
     def __init__(self, oxidation_states):
-        self.oxi_states = oxidation_states
+        self.oxidation_states = oxidation_states
 
     def apply_transformation(self, structure):
         s = structure.copy()
-        s.add_oxidation_state_by_element(self.oxi_states)
+        s.add_oxidation_state_by_element(self.oxidation_states)
         return s
 
     @property
@@ -155,6 +127,10 @@ class AutoOxiStateDecorationTransformation(AbstractTransformation):
 
     def __init__(self, symm_tol=0.1, max_radius=4, max_permutations=100000,
                  distance_scale_factor=1.015):
+        self.symm_tol = symm_tol
+        self.max_radius = max_radius
+        self.max_permutations = max_permutations
+        self.distance_scale_factor = distance_scale_factor
         self.analyzer = BVAnalyzer(symm_tol, max_radius, max_permutations,
                                    distance_scale_factor)
 
@@ -174,6 +150,9 @@ class OxidationStateRemovalTransformation(AbstractTransformation):
     """
     This transformation removes oxidation states from a structure.
     """
+    def __init__(self):
+        pass
+
     def apply_transformation(self, structure):
         s = structure.copy()
         s.remove_oxidation_states()
@@ -433,9 +412,7 @@ class OrderDisorderedStructureTransformation(AbstractTransformation):
     USE WITH CARE.
 
     Args:
-        num_structures: Maximum number of structures to return
-        mev_cutoff (float): maximum mev per atom above the minimum energy
-            ordering for a structure to be returned
+        algo (int): Algorithm to use.
         symmetrized_structures (bool): Whether the input structures are
             instances of SymmetrizedStructure, and that their symmetry
             should be used for the grouping of sites.
@@ -485,9 +462,9 @@ class OrderDisorderedStructureTransformation(AbstractTransformation):
 
         equivalent_sites = []
         exemplars = []
-        #generate list of equivalent sites to order
-        #equivalency is determined by sp_and_occu and symmetry
-        #if symmetrized structure is true
+        # generate list of equivalent sites to order
+        # equivalency is determined by sp_and_occu and symmetry
+        # if symmetrized structure is true
         for i, site in enumerate(structure):
             if site.is_ordered:
                 continue
@@ -509,32 +486,32 @@ class OrderDisorderedStructureTransformation(AbstractTransformation):
                 equivalent_sites.append([i])
                 exemplars.append(site)
 
-        #generate the list of manipulations and input structure
+        # generate the list of manipulations and input structure
         s = Structure.from_sites(structure)
         m_list = []
         for g in equivalent_sites:
             total_occupancy = sum([structure[i].species_and_occu for i in g],
                                   Composition())
             total_occupancy = dict(total_occupancy.items())
-            #round total occupancy to possible values
+            # round total occupancy to possible values
             for k, v in total_occupancy.items():
                 if abs(v - round(v)) > 0.25:
                     raise ValueError("Occupancy fractions not consistent "
                                      "with size of unit cell")
                 total_occupancy[k] = int(round(v))
-            #start with an ordered structure
+            # start with an ordered structure
             initial_sp = max(total_occupancy.keys(),
                              key=lambda x: abs(x.oxi_state))
             for i in g:
                 s[i] = initial_sp
-            #determine the manipulations
+            # determine the manipulations
             for k, v in total_occupancy.items():
                 if k == initial_sp:
                     continue
                 m = [k.oxi_state / initial_sp.oxi_state if initial_sp.oxi_state
                      else 0, v, list(g), k]
                 m_list.append(m)
-            #determine the number of empty sites
+            # determine the number of empty sites
             empty = len(g) - sum(total_occupancy.values())
             if empty > 0.5:
                 m_list.append([0, empty, list(g), None])
