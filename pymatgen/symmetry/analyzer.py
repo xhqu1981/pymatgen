@@ -696,12 +696,14 @@ class SpacegroupAnalyzer(object):
                                to_unit_cell=True)
         return new_struct.get_sorted_structure()
 
-    def get_kpoints_weights(self, kpoints, atol=1e-8):
+    def get_kpoint_weights(self, kpoints, atol=1e-8):
         """
         Calculate the weights for a list of kpoints.
 
         Args:
-            kpoints (Sequence): Sequence of kpoints. np.arrays is fine.
+            kpoints (Sequence): Sequence of kpoints. np.arrays is fine. Note
+                that the code does not check that the list of kpoints
+                provided does not contain duplicates.
             atol (float): Tolerance for fractional coordinates comparisons.
 
         Returns:
