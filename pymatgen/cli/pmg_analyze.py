@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
@@ -9,10 +8,6 @@ import os
 import re
 import logging
 import multiprocessing
-try:
-    from urllib.request import urlretrieve
-except ImportError:
-    from urllib import urlretrieve
 
 from tabulate import tabulate
 
@@ -93,6 +88,7 @@ def get_energies(rootdir, reanalyze, verbose, detailed, sort, fmt):
         print(msg)
     else:
         print("No valid vasp run found.")
+        os.unlink(SAVE_FILE)
 
 
 def get_magnetizations(mydir, ion_list):
@@ -128,14 +124,14 @@ def get_magnetizations(mydir, ion_list):
     print(tabulate(data, headers))
 
 
-def parse_vasp(args):
+def analyze(args):
 
     default_energies = not (args.get_energies or args.ion_list)
 
     if args.get_energies or default_energies:
         for d in args.directories:
             get_energies(d, args.reanalyze, args.verbose,
-                         args.detailed, args.sort[0], args.format)
+                         args.detailed, args.sort, args.format)
     if args.ion_list:
         if args.ion_list[0] == "All":
             ion_list = None
