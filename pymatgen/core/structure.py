@@ -2127,6 +2127,10 @@ class Structure(IStructure, collections.MutableSequence):
                 s["Mn"] = "Fe"
                 Replaces all Mn in the structure with Fe. This is
                 a short form for the more complex replace_species.
+
+                s["Mn"] = "Fe0.5Co0.5"
+                Replaces all Mn in the structure with Fe: 0.5, Co: 0.5, i.e.,
+                creates a disordered structure!
         """
 
         if isinstance(i, int):
@@ -2646,7 +2650,9 @@ class Molecule(IMolecule, collections.MutableSequence):
         Modify a site in the molecule.
 
         Args:
-            i (int): Index
+            i (int, [int], slice, Specie-like): Indices to change. You can
+                specify these as an int, a list of int, or a species-like
+                string.
             site (PeriodicSite/Specie/Sequence): Three options exist. You can
                 provide a Site directly, or for convenience, you can provide
                 simply a Specie-like string/object, or finally a (Specie,
