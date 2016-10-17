@@ -1,7 +1,6 @@
 Change log
 ==========
 
-v4.4.1
+v4.4.5
 ------
-* Massive updates to FEFF support (Kiran Mathews).
-* Bug fixes in band structure plotting.
+* Bug fix for SubstitutionProb.
