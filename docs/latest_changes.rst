@@ -1,6 +1,6 @@
 Change log
 ==========
 
-v4.4.6
+v4.4.8
 ------
-* Update to spglib 1.9.6, which fixes some bugs and is Windows compatible.
+* Cleanup of entry points and dependencies.
