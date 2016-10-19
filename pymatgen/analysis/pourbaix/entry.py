@@ -447,3 +447,26 @@ def ion_or_solid_comp_object(formula):
     else:
         comp_obj = Composition(formula)
     return comp_obj
+
+class TDPourbaixEntry(PourbaixEntry):
+    """
+    Temperature dependent version of PourbaixEntry
+
+    Args:
+        entry (ComputedEntry/ComputedStructureEntry/PDEntry/IonEntry): An
+            entry object.
+        energy (float): Gibbs Free Energy of entry.
+        entropy (float): Entropy of the entry. The enthalpy will be deduced
+                         by substrating entropy contribution from Gibbs Free
+                         energy.
+        temperature (float): The temperature at which the Gibbs Free energy is evaluated.
+        correction (float): Entry energy corrections.
+    """
+    def __init__(self, entry, energy, entropy, temperature, correction=0.0, entry_id=None):
+        entry.energy = energy
+        super(TDPourbaixEntry, self).__init__(entry=entry, correction=correction, entry_id=entry_id)
+        self.entropy = entropy
+        self.temperature = temperature
+        self.enthalpy = self.energy - (- temperature * self.entropy)
+
+
