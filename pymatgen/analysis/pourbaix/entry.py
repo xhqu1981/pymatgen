@@ -462,11 +462,69 @@ class TDPourbaixEntry(PourbaixEntry):
         temperature (float): The temperature at which the Gibbs Free energy is evaluated.
         correction (float): Entry energy corrections.
     """
-    def __init__(self, entry, energy, entropy, temperature, correction=0.0, entry_id=None):
-        entry.energy = energy
+    def __init__(self, entry, gibbs_energy, entropy, temperature, correction=0.0, entry_id=None):
+        enthalpy = gibbs_energy - (- temperature * entropy)
+        entry.energy = enthalpy
         super(TDPourbaixEntry, self).__init__(entry=entry, correction=correction, entry_id=entry_id)
         self.entropy = entropy
         self.temperature = temperature
-        self.enthalpy = self.energy - (- temperature * self.entropy)
+        self.enthalpy = enthalpy
 
+    @property
+    def energy(self):
+        """
+        The Gibbs Free energy of the entry
+        """
+        return self.enthalpy - (self.temperature * self.entropy) + self.correction
 
+    def g0_replace(self, term):
+        """
+        Replace g0 by a different value.
+
+        Args:
+            term: New value for g0
+        """
+        self.uncorrected_energy = term - (- self.temperature * self.entropy)
+        self.correction = 0.0
+
+    def as_dict(self):
+        d = super(TDPourbaixEntry, self).as_dict()
+        d["temperature"] = self.temperature
+        d["entropy"] = self.entropy
+        d["enthalpy"] = self.enthalpy
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Returns a TDPourbaixEntry by reading in an Ion
+        """
+        entry_type = d["entry type"]
+        if entry_type == "Ion":
+            entry = IonEntry.from_dict(d["entry"])
+        else:
+            entry = PDEntry.from_dict(d["entry"])
+        correction = d["correction"]
+        entry_id = d["entry_id"]
+        temperature = d["temperature"]
+        entropy = d["entropy"]
+        enthalpy = d["enthalpy"]
+        gibbs_energy = enthalpy - temperature * entropy
+        return TDPourbaixEntry(entry, gibbs_energy, entropy, temperature, correction, entry_id)
+
+    def scale(self, factor):
+        """
+            Normalize all entries by normalization factor.
+
+            Args:
+                factor: Normalization factor
+        """
+        super(TDPourbaixEntry, self).scale(factor)
+        self.entropy *= factor
+        self.enthalpy *= factor
+
+    def __repr__(self):
+        pd_entry_str = super(TDPourbaixEntry, self).__repr__().\
+            replace("energy", "Gibbs free energy")
+        return "TD{}, enthalpy = {:.4f}, entropy = {:.4f}, temperature = {:.1f}".\
+            format(pd_entry_str, self.enthalpy, self.entropy, self.temperature)
