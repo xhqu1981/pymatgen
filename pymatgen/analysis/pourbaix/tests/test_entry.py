@@ -211,11 +211,21 @@ class TestTDPourbaixEntry(unittest.TestCase):
         self.assertEqual(self.tdPxSol.nPhi, -6, "Wrong nPhi!")
         self.assertEqual(self.tdPxSol.nH2O, 3, "Wrong nH2O!")
 
+    def test_str(self):
+        ion_text = str(self.tdPxIon)
+        self.assertIn("TD", ion_text)
+        self.assertIn("enthalpy = 24.2981", ion_text)
+        self.assertIn("entropy = 0.0010", ion_text)
+        self.assertIn("temperature = 298.1", ion_text)
+        self.assertIn("Gibbs free energy = 24.0000", ion_text)
+
     def test_to_from_dict(self):
         d = self.tdPxIon.as_dict()
         ion_entry = self.tdPxIon.from_dict(d)
-        print(ion_entry)
         self.assertEqual(ion_entry.entry.name, "MnO4[-]", "Wrong Entry!")
+        self.assertEqual(ion_entry.enthalpy, 24.29815)
+        self.assertEqual(ion_entry.entropy, 0.001)
+        self.assertEqual(ion_entry.temperature, 298.15)
 
 
 if __name__ == '__main__':
