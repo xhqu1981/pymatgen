@@ -322,3 +322,39 @@ class PourbaixDiagram(object):
         Return unprocessed entries
         """
         return self._unprocessed_entries
+
+
+class TDPourbaixDiagram(PourbaixDiagram):
+    """
+    Temparature Dependent
+
+    Args:
+        entries: Entries list containing both Solids and Ions
+        comp_dict: Dictionary of compositions
+        plot_type (str): Choose the variables for the plot. Either "T_pH"
+                         or "E_T"
+        const_pot (float): The fixed value for E. Only need to be set if
+                           plot type "T_pH" is requested. All the chemical
+                           potentials will be deduced using this value.
+        const_ph (float): The fixed value for pH. Only need to be set if
+                          plot type "E_T" is requested. All the chemical
+                          potentials will be deduced using this value.
+    """
+
+    PLOT_T_pH = 1
+    PLOT_E_T = 2
+    PLOT_TYPE_DICT = {"T_pH": PLOT_T_pH, "E_T": PLOT_E_T}
+
+    def __init__(self, entries, comp_dict=None, plot_type="T_pH", const_pot=None, const_ph=None):
+        if plot_type not in self.PLOT_TYPE_DICT.keys():
+            raise ValueError("Parameter plot_type must be either \"T_pH\" or \"E_T\".")
+        self.plot_type = self.PLOT_TYPE_DICT[plot_type]
+        self.const_E = const_pot
+        self.const_pH = const_ph
+        if self.const_E is None and self.plot_type == self.PLOT_T_pH:
+            raise ValueError("The value of E must be set to a fixed value (constructor "
+                             "parameter \"const_pot\") in case of T_pH plot.")
+        if self.const_pH is None and self.plot_type == self.PLOT_E_T:
+            raise ValueError("The value of pH must be set to a fixed value (constructor"
+                             " parameter \"const_ph\") in case of E_T plot.")
+        super(TDPourbaixDiagram, self).__init__(entries, comp_dict)
