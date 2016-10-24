@@ -4,10 +4,11 @@
 
 from __future__ import unicode_literals
 
+import copy
 import unittest
 import os
 
-from pymatgen.analysis.pourbaix.entry import PourbaixEntry, IonEntry, MultiEntry
+from pymatgen.analysis.pourbaix.entry import PourbaixEntry, IonEntry, MultiEntry, TDPourbaixEntry
 from pymatgen.analysis.pourbaix.entry import PourbaixEntryIO
 from pymatgen.phasediagram.entries import PDEntry
 from pymatgen.core.ion import Ion
@@ -164,6 +165,57 @@ class TestPourbaixEntryIO(unittest.TestCase):
                          "Wrong elements!")
         self.assertEqual(len(entries), 8, "Wrong number of entries!")
         os.remove("pourbaix_test_entries.csv")
+
+class TestTDPourbaixEntry(unittest.TestCase):
+    """
+    Test all functions using a fictitious entry
+    """
+    def setUp(self):
+        comp = Composition("Mn2O3")
+        self.solentry = PDEntry(comp, 49)
+        ion = Ion.from_formula("MnO4-")
+        self.ionentry = IonEntry(ion, 25)
+        self.tdPxIon = TDPourbaixEntry(self.ionentry, gibbs_energy=24, entropy=0.001, temperature=298.15)
+        self.tdPxSol = TDPourbaixEntry(self.solentry, gibbs_energy=45, entropy=0.001, temperature=298.15)
+        self.tdPxIon.conc = 1e-4
+
+    def test_pourbaix_entry(self):
+        self.assertEqual(self.tdPxIon.entry.energy, 24.29815, "Wrong Energy!")
+        self.assertEqual(self.tdPxIon.entry.name,
+                         "MnO4[-]", "Wrong Entry!")
+        self.assertEqual(self.tdPxSol.entry.energy, 45.29815, "Wrong Energy!")
+        self.assertEqual(self.tdPxSol.entry.name,
+                         "Mn2O3", "Wrong Entry!")
+        self.assertEqual(self.tdPxIon.g0, 24, "Wrong Energy!")
+        self.assertEqual(self.tdPxSol.g0, 45, "Wrong Energy!")
+        self.assertEqual(self.tdPxIon.conc, 1e-4, "Wrong concentration!")
+
+    def test_scale(self):
+        se2 = copy.deepcopy(self.tdPxSol)
+        se2.scale(1.0/se2.nM)
+        self.assertEqual(se2.g0, 22.5)
+        self.assertEqual(se2.entropy, 0.0005)
+        ion2 = Ion.from_formula("MnO4-")
+        ionentry2 = IonEntry(ion2, 25)
+        ie2 = TDPourbaixEntry(ionentry2, gibbs_energy=24, entropy=0.001, temperature=298.15)
+        ie2.scale(1.0 / 2.0)
+        self.assertEqual(ie2.g0, 12)
+        self.assertEqual(ie2.entropy, 0.0005)
+
+    def test_calc_coeff_terms(self):
+        self.assertEqual(self.tdPxIon.npH, -8, "Wrong npH!")
+        self.assertEqual(self.tdPxIon.nPhi, -7, "Wrong nPhi!")
+        self.assertEqual(self.tdPxIon.nH2O, 4, "Wrong nH2O!")
+
+        self.assertEqual(self.tdPxSol.npH, -6, "Wrong npH!")
+        self.assertEqual(self.tdPxSol.nPhi, -6, "Wrong nPhi!")
+        self.assertEqual(self.tdPxSol.nH2O, 3, "Wrong nH2O!")
+
+    def test_to_from_dict(self):
+        d = self.tdPxIon.as_dict()
+        ion_entry = self.tdPxIon.from_dict(d)
+        print(ion_entry)
+        self.assertEqual(ion_entry.entry.name, "MnO4[-]", "Wrong Entry!")
 
 
 if __name__ == '__main__':
