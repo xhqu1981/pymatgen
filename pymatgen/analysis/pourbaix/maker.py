@@ -113,12 +113,19 @@ class PourbaixDiagram(object):
         """
         data = []
         for entry in entries_to_process:
-            row = [entry.npH, entry.nPhi, entry.g0]
+            row = self._process_conv_hull_data_row(entry)
             data.append(row)
         temp = sorted(zip(data, self._qhull_entries),
                       key=lambda x: x[0][2])
         [data, self._qhull_entries] = list(zip(*temp))
         return data
+
+    def _process_conv_hull_data_row(self, entry):
+        """
+        Transform entry to a vector that can be used directly by convex hull algorithm.
+        """
+        row = [entry.npH, entry.nPhi, entry.g0]
+        return row
 
     def _process_multielement_entries(self):
         """
