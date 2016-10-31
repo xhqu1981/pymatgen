@@ -122,7 +122,7 @@ class PourbaixAnalyzer(object):
                                   for row in self._pd._qhull_data]) * limits[1][1]
         g_max = (-1 * max([abs(pt[2]) for pt in on_plane_points])
                   + ph_max_contrib + V_max_contrib) - 10
-        point_in_region = [7, 0, g_max]
+        point_in_region = [sum(limits[0])/2.0, sum(limits[1])/2.0, g_max]
 
         # Append border hyperplanes along limits
         for i in range(len(limits)):
