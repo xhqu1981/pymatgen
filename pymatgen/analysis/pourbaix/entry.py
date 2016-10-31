@@ -477,6 +477,12 @@ class TDPourbaixEntry(PourbaixEntry):
         """
         return self.enthalpy - (self.temperature * self.entropy) + self.correction
 
+    def g0_at(self, temperature):
+        """
+        The Gibbs Free energy at specified temperature
+        """
+        return self.enthalpy - (temperature * self.entropy) + self.correction
+
     def g0_replace(self, term):
         """
         Replace g0 by a different value.
