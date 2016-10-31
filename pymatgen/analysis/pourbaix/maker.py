@@ -369,3 +369,16 @@ class TDPourbaixDiagram(PourbaixDiagram):
                 raise ValueError("To construct a temperature dependent Pourbaix Diagram, "
                                  "all the entries must be a TDPourbaixEntry object")
         super(TDPourbaixDiagram, self).__init__(entries, comp_dict)
+
+    def _process_conv_hull_data_row(self, entry):
+        """
+        Override the parent implementation to bake in the entropy.
+        """
+        g0_zero_t = entry.g0_at(0.0)
+        if self.plot_type == self.PLOT_T_pH:
+            row = [entry.npH, entry.entropy, g0_zero_t]
+        elif self.plot_type == self.PLOT_E_T:
+            row = [entry.entropy, entry.nPhi, g0_zero_t]
+        else:
+            raise ValueError("Unsupported plot type")
+        return row
