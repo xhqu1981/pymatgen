@@ -25,7 +25,7 @@ import numpy as np
 import itertools
 from itertools import chain
 from pyhull.convex_hull import ConvexHull
-from pymatgen.analysis.pourbaix.entry import MultiEntry, ion_or_solid_comp_object
+from pymatgen.analysis.pourbaix.entry import MultiEntry, ion_or_solid_comp_object, TDPourbaixEntry
 from pymatgen.core import Element, Composition
 
 
@@ -357,4 +357,8 @@ class TDPourbaixDiagram(PourbaixDiagram):
         if self.const_pH is None and self.plot_type == self.PLOT_E_T:
             raise ValueError("The value of pH must be set to a fixed value (constructor"
                              " parameter \"const_ph\") in case of E_T plot.")
+        for entry in entries:
+            if not isinstance(entry, TDPourbaixEntry):
+                raise ValueError("To construct a temperature dependent Pourbaix Diagram, "
+                                 "all the entries must be a TDPourbaixEntry object")
         super(TDPourbaixDiagram, self).__init__(entries, comp_dict)
