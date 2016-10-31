@@ -38,7 +38,7 @@ class PourbaixAnalyzer(object):
         self._pd = pd
         self._keys = ['H+', 'V', '1']
         self.chempot_limits = None
-        self._axis_coefficient = [-0.0591, -1.0]  # x-pH, y-Potential
+        self._axis_coefficient = [0.0591, 1.0]  # x-pH, y-Potential
 
     def get_facet_chempots(self, facet):
         """
@@ -101,9 +101,9 @@ class PourbaixAnalyzer(object):
                         self._axis_coefficient[1] * row[1],
                         1]
             if abs(norm_vec[0]) > tol:
-                this_basis_vecs.append([-norm_vec[2]/norm_vec[0], 0, 1])
+                this_basis_vecs.append([norm_vec[2]/norm_vec[0], 0, 1])
             if abs(norm_vec[1]) > tol:
-                this_basis_vecs.append([0, -norm_vec[2]/norm_vec[1], 1])
+                this_basis_vecs.append([0, norm_vec[2]/norm_vec[1], 1])
             if len(this_basis_vecs) == 0:
                 basis_vecs.append([[1, 0, 0], [0, 1, 0]])
             elif len(this_basis_vecs) == 1:
@@ -116,9 +116,9 @@ class PourbaixAnalyzer(object):
                 basis_vecs.append(this_basis_vecs)
 
         # Find point in half-space in which optimization is desired
-        ph_max_contrib = -1 * max([abs(-self._axis_coefficient[0] * row[0])
+        ph_max_contrib = -1 * max([abs(self._axis_coefficient[0] * row[0])
                                     for row in self._pd._qhull_data]) * limits[0][1]
-        V_max_contrib = -1 * max([abs(-self._axis_coefficient[1] * row[1])
+        V_max_contrib = -1 * max([abs(self._axis_coefficient[1] * row[1])
                                   for row in self._pd._qhull_data]) * limits[1][1]
         g_max = (-1 * max([abs(pt[2]) for pt in on_plane_points])
                   + ph_max_contrib + V_max_contrib) - 10
@@ -223,7 +223,7 @@ class PourbaixAnalyzer(object):
         g0 = entry.g0
         npH = entry.npH * self._axis_coefficient[0]
         nPhi = entry.nPhi * self._axis_coefficient[1]
-        return g0 - npH * pH - nPhi * V
+        return g0 + npH * pH + nPhi * V
 
     def get_decomposition(self, entry):
         """
