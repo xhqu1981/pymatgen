@@ -51,11 +51,15 @@ class PourbaixAnalyzer(object):
             { element: chempot } for all elements in the phase diagram.
         """
         entrylist = [self._pd.qhull_entries[i] for i in facet]
-        energylist = [self._pd.qhull_entries[i].g0 for i in facet]
+        energylist = self._make_energylist(facet)
         m = self._make_comp_matrix(entrylist)
         chempots = np.dot(np.linalg.inv(m), energylist)
 
         return dict(zip(self._keys, chempots))
+
+    def _make_energylist(self, facet):
+        energylist = [self._pd.qhull_entries[i].g0 for i in facet]
+        return energylist
 
     def _make_comp_matrix(self, entrylist):
         """
@@ -300,3 +304,19 @@ class TDPourbaixAnalyzer(PourbaixAnalyzer):
         else:
             raise ValueError("Parameter plot_type must be either \"T_pH\" or \"E_T\".")
 
+
+    def _make_energylist(self, facet):
+        """
+        Override the parent implementation to use enthalpy as starting g0.
+        """
+        energylist = [self._pd.qhull_entries[i].g0_at(0.0) for i in facet]
+
+    def _make_comp_matrix(self, entrylist):
+        """
+            Override the parent implementation to bake in the entropy.
+        """
+        from pymatgen.analysis.pourbaix.maker import TDPourbaixDiagram
+        if self._pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
+            return np.array([[entry.npH, entry.entropy, 1] for entry in entrylist])
+        elif self._pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
+            return np.array([[entry.entropy, entry.nPhi, 1] for entry in entrylist])
