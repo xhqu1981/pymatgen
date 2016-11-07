@@ -374,10 +374,11 @@ class TDPourbaixDiagram(PourbaixDiagram):
         """
         Override the parent implementation to bake in the entropy.
         """
-        g0_zero_t = entry.g0_at(0.0)
         if self.plot_type == self.PLOT_T_pH:
+            g0_zero_t = entry.g0_at(0.0) + entry.nPhi * self.const_E
             row = [entry.npH, entry.entropy, g0_zero_t]
         elif self.plot_type == self.PLOT_E_T:
+            g0_zero_t = entry.g0_at(0.0) + entry.npH * self.const_pH * PREFAC
             row = [entry.entropy, entry.nPhi, g0_zero_t]
         else:
             raise ValueError("Unsupported plot type")

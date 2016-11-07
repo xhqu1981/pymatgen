@@ -309,7 +309,16 @@ class TDPourbaixAnalyzer(PourbaixAnalyzer):
         """
         Override the parent implementation to use enthalpy as starting g0.
         """
-        energylist = [self._pd.qhull_entries[i].g0_at(0.0) for i in facet]
+        from pymatgen.analysis.pourbaix.maker import TDPourbaixDiagram
+        if self._pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
+            energylist = [self._pd.qhull_entries[i].g0_at(0.0) + self._pd.qhull_entries[i].nPhi * self._pd.const_E
+                          for i in facet]
+        elif self._pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
+            energylist = [self._pd.qhull_entries[i].g0_at(0.0) + self._pd.qhull_entries[i].npH * self._pd.const_pH
+                          for i in facet]
+        else:
+            raise ValueError("Unsupported plot type")
+        return energylist
 
     def _make_comp_matrix(self, entrylist):
         """
