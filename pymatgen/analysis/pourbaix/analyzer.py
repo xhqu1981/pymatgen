@@ -329,3 +329,5 @@ class TDPourbaixAnalyzer(PourbaixAnalyzer):
             return np.array([[entry.npH, entry.entropy, 1] for entry in entrylist])
         elif self._pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
             return np.array([[entry.entropy, entry.nPhi, 1] for entry in entrylist])
+        else:
+            raise ValueError("Unsupported plot type")
