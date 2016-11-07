@@ -39,6 +39,7 @@ class PourbaixAnalyzer(object):
         self._keys = ['H+', 'V', '1']
         self.chempot_limits = None
         self._axis_coefficient = [0.0591, 1.0]  # x-pH, y-Potential
+        self.default_limits = [[-2, 16], [-4, 4]]
 
     def get_facet_chempots(self, facet):
         """
@@ -68,21 +69,20 @@ class PourbaixAnalyzer(object):
         """
         return np.array([[entry.npH, entry.nPhi, 1] for entry in entrylist])
 
-    def get_chempot_range_map(self, limits=[[-2,16], [-4,4]]):
+    def get_chempot_range_map(self, limits=None):
         """
         Returns a chemical potential range map for each stable entry.
 
         Args:
-            elements: Sequence of elements to be considered as independent
-                variables. E.g., if you want to show the stability ranges of
-                all Li-Co-O phases wrt to uLi and uO, you will supply
-                [Element("Li"), Element("O")]
+            limits (list(list)): Axis limits. Default values will be use
+            according to plot type if set to None.
 
         Returns:
             Returns a dict of the form {entry: [simplices]}. The list of
             simplices are the sides of the N-1 dim polytope bounding the
             allowable chemical potential range of each entry.
         """
+        limits = self.default_limits
         tol = PourbaixAnalyzer.numerical_tol
         all_chempots = []
         facets = self._pd.facets
@@ -298,9 +298,11 @@ class TDPourbaixAnalyzer(PourbaixAnalyzer):
         if pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
             self._keys = ['H+', 'T', '1']
             self._axis_coefficient = [0.0591, -1.0]  # x-pH, y-Potential
+            self.default_limits = [[-2, 16], [273.15, 373.15]]
         elif pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
             self._keys = ['E', 'T', '1']
             self._axis_coefficient = [1.0, -1.0]  # x-pH, y-Potential
+            self.default_limits = [[273.15, 373.15], [-4, 4]]
         else:
             raise ValueError("Parameter plot_type must be either \"T_pH\" or \"E_T\".")
 
