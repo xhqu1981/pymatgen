@@ -84,6 +84,9 @@ class PourbaixAnalyzer(object):
         """
         limits = self.default_limits
         tol = PourbaixAnalyzer.numerical_tol
+
+        #  TODO: the all_chempots generation block doesn't have any effort, remove it.
+        #  --- XQ Nov 7, 2016
         all_chempots = []
         facets = self._pd.facets
         for facet in facets:
