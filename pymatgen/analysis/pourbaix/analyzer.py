@@ -276,3 +276,27 @@ class PourbaixAnalyzer(object):
             energy above hull of 0.
         """
         return self.get_decomp_and_e_above_hull(entry)[1]
+
+
+class TDPourbaixAnalyzer(PourbaixAnalyzer):
+    """
+    Temperature dependent version of PourbaixAnalyzer.
+
+    Args:
+        pd: Pourbaix Diagram to analyze.
+    """
+    def __init__(self, pd):
+        from pymatgen.analysis.pourbaix.maker import TDPourbaixDiagram
+        if not isinstance(pd, TDPourbaixDiagram):
+            raise ValueError("A TDPourbaixDiagram must be provided to initialize"
+                             " a TDPourbaixAnalyzer object")
+        super(TDPourbaixAnalyzer, self).__init__(pd)
+        if pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
+            self._keys = ['H+', 'T', '1']
+            self._axis_coefficient = [0.0591, -1.0]  # x-pH, y-Potential
+        elif pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
+            self._keys = ['E', 'T', '1']
+            self._axis_coefficient = [1.0, -1.0]  # x-pH, y-Potential
+        else:
+            raise ValueError("Parameter plot_type must be either \"T_pH\" or \"E_T\".")
+
