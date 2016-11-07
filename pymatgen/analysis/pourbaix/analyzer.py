@@ -99,7 +99,7 @@ class PourbaixAnalyzer(object):
         basis_vecs = []
         on_plane_points = []
         # Create basis vectors
-        for ie, entry in self._pd.stable_entries:
+        for entry in self._pd.stable_entries:
             ie = self._pd.qhull_entries.index(entry)
             row = self._pd._qhull_data[ie]
             on_plane_points.append([0, 0, row[2]])
