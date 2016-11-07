@@ -297,11 +297,11 @@ class TDPourbaixAnalyzer(PourbaixAnalyzer):
         super(TDPourbaixAnalyzer, self).__init__(pd)
         if pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
             self._keys = ['H+', 'T', '1']
-            self._axis_coefficient = [0.0591, -1.0]  # x-pH, y-Potential
+            self._axis_coefficient = [0.0591, 1.0]  # x-pH, y-Potential
             self.default_limits = [[-2, 16], [273.15, 373.15]]
         elif pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
             self._keys = ['E', 'T', '1']
-            self._axis_coefficient = [1.0, -1.0]  # x-pH, y-Potential
+            self._axis_coefficient = [1.0, 1.0]  # x-pH, y-Potential
             self.default_limits = [[273.15, 373.15], [-4, 4]]
         else:
             raise ValueError("Parameter plot_type must be either \"T_pH\" or \"E_T\".")
@@ -328,8 +328,8 @@ class TDPourbaixAnalyzer(PourbaixAnalyzer):
         """
         from pymatgen.analysis.pourbaix.maker import TDPourbaixDiagram
         if self._pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
-            return np.array([[entry.npH, entry.entropy, 1] for entry in entrylist])
+            return np.array([[entry.npH, -entry.entropy, 1] for entry in entrylist])
         elif self._pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
-            return np.array([[entry.entropy, entry.nPhi, 1] for entry in entrylist])
+            return np.array([[-entry.entropy, entry.nPhi, 1] for entry in entrylist])
         else:
             raise ValueError("Unsupported plot type")
