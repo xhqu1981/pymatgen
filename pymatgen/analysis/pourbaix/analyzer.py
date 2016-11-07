@@ -162,6 +162,8 @@ class PourbaixAnalyzer(object):
                          hs_int.facets_by_halfspace[i]]
             if len(vertices) < 1:
                 continue
+            # TODO: if the purpose of simplex is only to get the domain center. Replace it with a better one.
+            # --- XQ Nov 7, 2016
             pourbaix_domains[self._pd.stable_entries[i]] = ConvexHull(vertices).simplices
 
             # Need to order vertices for highcharts area plot
