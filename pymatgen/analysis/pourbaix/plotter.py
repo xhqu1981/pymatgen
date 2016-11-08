@@ -190,7 +190,7 @@ class PourbaixPlotter(object):
                              label=lbl)
         plt.legend(labels)
         plt.xlabel(self._labels_map[self._analyzer._keys[0]])
-        plt.ylabel(self._labels_map[self._analyzer._keys[0]])
+        plt.ylabel(self._labels_map[self._analyzer._keys[1]])
         plt.show()
 
     def plot_chempot_range_map(self, limits=None, title="", filename=""):
