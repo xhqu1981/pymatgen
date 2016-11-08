@@ -54,6 +54,7 @@ class PourbaixPlotter(object):
         self._pd = pourbaixdiagram
         self.lines = uniquelines(self._pd.facets)
         self.show_unstable = show_unstable
+        self._labels_map = {'H+': "pH", 'V': "E (V)"}
 
     @property
     def pourbaix_hull_plot_data(self):
@@ -174,7 +175,9 @@ class PourbaixPlotter(object):
         labels = []
         color_index = -1
         for entry in entries:
-            normal = np.array([-PREFAC * entry.npH, -entry.nPhi, +1])
+            row = self._pd._process_conv_hull_data_row(entry)
+            coefs = self._analyzer._axis_coefficient
+            normal = np.array([-coefs[0] * row[0], -coefs[1] * row[1], +1])
             d = entry.g0
             color_index += 1
             pH, V = np.meshgrid(np.linspace(-10, 28, 100),
@@ -186,8 +189,8 @@ class PourbaixPlotter(object):
             fig.plot_surface(pH, V, g, color=color_array[color_index],
                              label=lbl)
         plt.legend(labels)
-        plt.xlabel("pH")
-        plt.ylabel("E (V)")
+        plt.xlabel(self._labels_map[self._analyzer._keys[0]])
+        plt.ylabel(self._labels_map[self._analyzer._keys[0]])
         plt.show()
 
     def plot_chempot_range_map(self, limits=None, title="", filename=""):
@@ -862,3 +865,4 @@ class TDPourbaixPlotter(PourbaixPlotter):
 
     def __init__(self, pourbaixdiagram, show_unstable=False):
         super(TDPourbaixPlotter, self).__init__(pourbaixdiagram, show_unstable)
+        self._labels_map['T'] = "T (K)"
