@@ -155,8 +155,8 @@ class PourbaixPlotter(object):
                 count += 1
 
         plt.figtext(0.01, 0.01, "\n".join(newlabels))
-        plt.xlabel("pH")
-        plt.ylabel("V")
+        plt.xlabel(self._labels_map[self._analyzer._keys[0]])
+        plt.ylabel(self._labels_map[self._analyzer._keys[1]])
         return plt
 
     def plot_planes(self):
