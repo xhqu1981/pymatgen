@@ -848,3 +848,17 @@ class PourbaixPlotter(object):
 
 def latexify_ion(formula):
     return re.sub(r"()\[([^)]*)\]", r"\1$^{\2}$", formula)
+
+
+class TDPourbaixPlotter(PourbaixPlotter):
+    """
+    Temperature dependent version of PourbaixPlotter.
+
+    Args:
+        phasediagram: A PhaseDiagram object.
+        show_unstable: Whether unstable phases will be plotted as well as
+            red crosses. Defaults to False.
+    """
+
+    def __init__(self, pourbaixdiagram, show_unstable=False):
+        super(TDPourbaixPlotter, self).__init__(pourbaixdiagram, show_unstable)
