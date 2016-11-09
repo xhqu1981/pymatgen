@@ -537,12 +537,7 @@ class PourbaixPlotter(object):
             xlim = self._analyzer.chempot_limits[0]
             ylim = self._analyzer.chempot_limits[1]
 
-        h_line = np.transpose([[xlim[0], -xlim[0] * PREFAC],
-                               [xlim[1], -xlim[1] * PREFAC]])
-        o_line = np.transpose([[xlim[0], -xlim[0] * PREFAC + 1.23],
-                               [xlim[1], -xlim[1] * PREFAC + 1.23]])
-        neutral_line = np.transpose([[7, ylim[0]], [7, ylim[1]]])
-        V0_line = np.transpose([[xlim[0], 0], [xlim[1], 0]])
+        h_line, o_line, neutral_line, V0_line = self.special_lines(xlim, ylim)
 
         ax = plt.gca()
         ax.set_xlim(xlim)
@@ -623,8 +618,8 @@ class PourbaixPlotter(object):
         plt.plot(neutral_line[0], neutral_line[1], "k-.", linewidth=lw)
         plt.plot(V0_line[0], V0_line[1], "k-.", linewidth=lw)
 
-        plt.xlabel("pH")
-        plt.ylabel("E (V)")
+        plt.xlabel(self._labels_map[self._analyzer._keys[0]])
+        plt.ylabel(self._labels_map[self._analyzer._keys[1]])
         plt.title(title, fontsize=20, fontweight='bold')
         return plt
 
