@@ -353,6 +353,15 @@ class PourbaixPlotter(object):
                         center_y = h2o_y + radius
         return center_x, center_y
 
+    def special_lines(self, xlim, ylim):
+        h_line = np.transpose([[xlim[0], -xlim[0] * PREFAC],
+                               [xlim[1], -xlim[1] * PREFAC]])
+        o_line = np.transpose([[xlim[0], -xlim[0] * PREFAC + 1.23],
+                               [xlim[1], -xlim[1] * PREFAC + 1.23]])
+        neutral_line = np.transpose([[7, ylim[0]], [7, ylim[1]]])
+        V0_line = np.transpose([[xlim[0], 0], [xlim[1], 0]])
+        return h_line, o_line, neutral_line, V0_line
+
     def get_pourbaix_plot(self, limits=None, title="", label_domains=True):
         """
         Plot Pourbaix diagram.
@@ -375,12 +384,7 @@ class PourbaixPlotter(object):
             xlim = self._analyzer.chempot_limits[0]
             ylim = self._analyzer.chempot_limits[1]
 
-        h_line = np.transpose([[xlim[0], -xlim[0] * PREFAC],
-                               [xlim[1], -xlim[1] * PREFAC]])
-        o_line = np.transpose([[xlim[0], -xlim[0] * PREFAC + 1.23],
-                               [xlim[1], -xlim[1] * PREFAC + 1.23]])
-        neutral_line = np.transpose([[7, ylim[0]], [7, ylim[1]]])
-        V0_line = np.transpose([[xlim[0], 0], [xlim[1], 0]])
+        h_line, o_line, neutral_line, V0_line = self.special_lines(xlim, ylim)
 
         ax = plt.gca()
         ax.set_xlim(xlim)
@@ -418,8 +422,8 @@ class PourbaixPlotter(object):
             if label_domains:
                 plt.annotate(self.print_name(entry), xy, fontsize=20, color="b")
 
-        plt.xlabel("pH")
-        plt.ylabel("E (V)")
+        plt.xlabel(self._labels_map[self._analyzer._keys[0]])
+        plt.ylabel(self._labels_map[self._analyzer._keys[1]])
         plt.title(title, fontsize=20, fontweight='bold')
         return plt
 
@@ -652,15 +656,6 @@ class PourbaixPlotter(object):
             comp = Composition(entry[:-3]) if "(s)" in entry else Ion.from_formula(entry)
             return len(set(comp.elements) - {Element("H"), Element("O")})
 
-        def special_lines(xlim, ylim):
-            h_line = np.transpose([[xlim[0], -xlim[0] * PREFAC],
-                                   [xlim[1], -xlim[1] * PREFAC]])
-            o_line = np.transpose([[xlim[0], -xlim[0] * PREFAC + 1.23],
-                                   [xlim[1], -xlim[1] * PREFAC + 1.23]])
-            neutral_line = np.transpose([[7, ylim[0]], [7, ylim[1]]])
-            V0_line = np.transpose([[xlim[0], 0], [xlim[1], 0]])
-            return h_line, o_line, neutral_line, V0_line
-
         from matplotlib.patches import Polygon
         from pymatgen import Composition, Element
         from pymatgen.core.ion import Ion
@@ -683,7 +678,7 @@ class PourbaixPlotter(object):
                 entry_dict_of_multientries[entry.name].append(entry)
 
         xlim, ylim = limits[:2] if limits else self._analyzer.chempot_limits[:2]
-        h_line, o_line, neutral_line, V0_line = special_lines(xlim, ylim)
+        h_line, o_line, neutral_line, V0_line = self.special_lines(xlim, ylim)
         ax = plt.gca()
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
