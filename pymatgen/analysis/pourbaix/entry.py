@@ -4,6 +4,10 @@
 
 from __future__ import division, unicode_literals
 
+import warnings
+
+from monty.dev import deprecated
+
 """
 Module which defines basic entries for each ion and oxide to compute a
 Pourbaix diagram
@@ -48,12 +52,12 @@ class PourbaixEntry(MSONable):
     """
     def __init__(self, entry, correction=0.0, entry_id=None):
         if isinstance(entry, IonEntry):
-            self.entry = entry
+            self.raw_entry = entry
             self.conc = 1.0e-6
             self.phase_type = "Ion"
             self.charge = entry.composition.charge
         else:
-            self.entry = entry
+            self.raw_entry = entry
             self.conc = 1.0
             self.phase_type = "Solid"
             self.charge = 0.0
@@ -62,24 +66,34 @@ class PourbaixEntry(MSONable):
         nH = 0
         nO = 0
         nM = 0
-        for elt in self.entry.composition.elements:
+        for elt in self.raw_entry.composition.elements:
             if elt == Element("H"):
-                nH = self.entry.composition[elt]
+                nH = self.raw_entry.composition[elt]
             elif elt == Element("O"):
-                nO = self.entry.composition[elt]
+                nO = self.raw_entry.composition[elt]
             else:
-                nM += self.entry.composition[elt]
+                nM += self.raw_entry.composition[elt]
         self.nM = nM
         self.npH = (nH - 2 * nO)
         self.nH2O = nO
         self.nPhi = (nH - 2 * nO - self.charge)
-        self.name = self.entry.composition.reduced_formula
+        self.name = self.raw_entry.composition.reduced_formula
         if self.phase_type == "Solid":
             self.name += "(s)"
         try:
             self.entry_id = entry.entry_id
         except AttributeError:
             self.entry_id = entry_id
+
+    @property
+    def entry(self):
+        """
+        Backward compatibility enter point for accessing "entry" field.
+        """
+        warnings.simplefilter('default')
+        warnings.warn("Field entry is deprecated, use raw_entry instead",
+                      DeprecationWarning, stacklevel=2)
+        return self.raw_entry
 
     @property
     def energy(self):
@@ -126,11 +140,11 @@ class PourbaixEntry(MSONable):
         """
         d = {"@module": self.__class__.__module__,
              "@class": self.__class__.__name__}
-        if isinstance(self.entry, IonEntry):
+        if isinstance(self.raw_entry, IonEntry):
             d["entry type"] = "Ion"
         else:
             d["entry type"] = "Solid"
-        d["entry"] = self.entry.as_dict()
+        d["entry"] = self.raw_entry.as_dict()
         d["pH factor"] = self.npH
         d["voltage factor"] = self.nPhi
         d["concentration"] = self.conc
@@ -183,14 +197,14 @@ class PourbaixEntry(MSONable):
         """
         Returns composition
         """
-        return self.entry.composition
+        return self.raw_entry.composition
 
     def reduced_entry(self):
         """
         Calculate reduction factor for composition, and reduce parameters by
         this factor.
         """
-        reduction_factor = self.entry.composition.\
+        reduction_factor = self.raw_entry.composition.\
             get_reduced_composition_and_factor()[1]
         self.nM /= reduction_factor
         self.scale(1.0 / reduction_factor)
@@ -200,12 +214,12 @@ class PourbaixEntry(MSONable):
         """
         Return number of atoms in current formula. Useful for normalization
         """
-        return self.entry.composition.num_atoms\
-            / self.entry.composition.get_reduced_composition_and_factor()[1]
+        return self.raw_entry.composition.num_atoms\
+            / self.raw_entry.composition.get_reduced_composition_and_factor()[1]
 
     def __repr__(self):
         return "Pourbaix Entry : {} with energy = {:.4f}, npH = {}, nPhi = {},\
-             nH2O = {}".format(self.entry.composition, self.g0, self.npH,
+             nH2O = {}".format(self.raw_entry.composition, self.g0, self.npH,
                                self.nPhi, self.nH2O)
 
     def __str__(self):
@@ -357,7 +371,7 @@ class PourbaixEntryIO(object):
         """
         elements = set()
         #TODO: oh god please fix this next line
-        list(map(elements.update, [entry.entry.composition.elements
+        list(map(elements.update, [entry.raw_entry.composition.elements
                               for entry in entries]))
         elements = sorted(list(elements), key=lambda a: a.X)
         with open(filename, "w") as f:
@@ -370,11 +384,11 @@ class PourbaixEntryIO(object):
                 row = [entry.name if not latexify_names
                        else re.sub(r"([0-9]+)", r"_{\1}", entry.name)]
                 if entry.phase_type == "Solid":
-                    reduction_fac = entry.entry.composition.\
+                    reduction_fac = entry.raw_entry.composition.\
                         get_reduced_composition_and_factor()[1]
                 else:
                     reduction_fac = 1.0
-                row.extend([entry.entry.composition[el] / reduction_fac
+                row.extend([entry.raw_entry.composition[el] / reduction_fac
                             for el in elements])
                 if entry.phase_type == "Solid":
                     reduction_fac = 1.0

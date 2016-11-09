@@ -31,11 +31,11 @@ class TestPourbaixEntry(unittest.TestCase):
         self.PxIon.conc = 1e-4
 
     def test_pourbaix_entry(self):
-        self.assertEqual(self.PxIon.entry.energy, 25, "Wrong Energy!")
-        self.assertEqual(self.PxIon.entry.name,\
+        self.assertEqual(self.PxIon.raw_entry.energy, 25, "Wrong Energy!")
+        self.assertEqual(self.PxIon.raw_entry.name,\
                           "MnO4[-]", "Wrong Entry!")
-        self.assertEqual(self.PxSol.entry.energy, 49, "Wrong Energy!")
-        self.assertEqual(self.PxSol.entry.name,\
+        self.assertEqual(self.PxSol.raw_entry.energy, 49, "Wrong Energy!")
+        self.assertEqual(self.PxSol.raw_entry.name,\
                            "Mn2O3", "Wrong Entry!")
         self.assertEqual(self.PxIon.g0, 25, "Wrong Energy!")
         self.assertEqual(self.PxSol.g0, 49, "Wrong Energy!")
@@ -53,7 +53,7 @@ class TestPourbaixEntry(unittest.TestCase):
     def test_to_from_dict(self):
         d = self.PxIon.as_dict()
         ion_entry = self.PxIon.from_dict(d)
-        self.assertEqual(ion_entry.entry.name, "MnO4[-]", "Wrong Entry!")
+        self.assertEqual(ion_entry.raw_entry.name, "MnO4[-]", "Wrong Entry!")
 
 
 class MultiEntryTest(unittest.TestCase):
@@ -180,11 +180,11 @@ class TestTDPourbaixEntry(unittest.TestCase):
         self.tdPxIon.conc = 1e-4
 
     def test_pourbaix_entry(self):
-        self.assertEqual(self.tdPxIon.entry.energy, 24.29815, "Wrong Energy!")
-        self.assertEqual(self.tdPxIon.entry.name,
+        self.assertEqual(self.tdPxIon.raw_entry.energy, 24.29815, "Wrong Energy!")
+        self.assertEqual(self.tdPxIon.raw_entry.name,
                          "MnO4[-]", "Wrong Entry!")
-        self.assertEqual(self.tdPxSol.entry.energy, 45.29815, "Wrong Energy!")
-        self.assertEqual(self.tdPxSol.entry.name,
+        self.assertEqual(self.tdPxSol.raw_entry.energy, 45.29815, "Wrong Energy!")
+        self.assertEqual(self.tdPxSol.raw_entry.name,
                          "Mn2O3", "Wrong Entry!")
         self.assertEqual(self.tdPxIon.g0, 24, "Wrong Energy!")
         self.assertEqual(self.tdPxSol.g0, 45, "Wrong Energy!")
@@ -222,7 +222,7 @@ class TestTDPourbaixEntry(unittest.TestCase):
     def test_to_from_dict(self):
         d = self.tdPxIon.as_dict()
         ion_entry = self.tdPxIon.from_dict(d)
-        self.assertEqual(ion_entry.entry.name, "MnO4[-]", "Wrong Entry!")
+        self.assertEqual(ion_entry.raw_entry.name, "MnO4[-]", "Wrong Entry!")
         self.assertEqual(ion_entry.enthalpy, 24.29815)
         self.assertEqual(ion_entry.entropy, 0.001)
         self.assertEqual(ion_entry.temperature, 298.15)
