@@ -851,3 +851,19 @@ class TDPourbaixPlotter(PourbaixPlotter):
     def __init__(self, pourbaixdiagram, show_unstable=False):
         super(TDPourbaixPlotter, self).__init__(pourbaixdiagram, show_unstable)
         self._labels_map['T'] = "T (K)"
+
+    def special_lines(self, xlim, ylim):
+        from pymatgen.analysis.pourbaix.maker import TDPourbaixDiagram
+        if self._pd.plot_type == TDPourbaixDiagram.PLOT_T_pH:
+            h_line = None
+            o_line = None
+        elif self._pd.plot_type == TDPourbaixDiagram.PLOT_E_T:
+            h_line = None
+            o_line = None
+        else:
+            raise ValueError("Unsupported plot type")
+        raise Exception("Temperature dependent version water stability is not "
+                        "implemented yet")
+        neutral_line = np.transpose([[sum(xlim)/2.0, ylim[0]], [sum(xlim)/2.0, ylim[1]]])
+        V0_line = np.transpose([[xlim[0], sum(ylim)/2.0], [xlim[1], sum(ylim)/2.0]])
+        return h_line, o_line, neutral_line, V0_line
