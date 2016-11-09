@@ -191,7 +191,7 @@ class PourbaixAnalyzer(object):
             coords = [np.array(self._pd.qhull_data[facet[i]][0:dim - 1])
                       for i in range(len(facet))]
             simplex = Simplex(coords)
-            comp_point = list(self._make_comp_matrix([entry])[0])
+            comp_point = list(self._make_comp_matrix([entry])[0][:2])
             return simplex.in_simplex(comp_point,
                                       PourbaixAnalyzer.numerical_tol)
         else:
