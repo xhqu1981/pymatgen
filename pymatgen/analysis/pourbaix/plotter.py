@@ -742,8 +742,8 @@ class PourbaixPlotter(object):
             plt.plot(neutral_line[0], neutral_line[1], "k-.", linewidth=h2o_lw, antialiased=False)
             plt.plot(V0_line[0], V0_line[1], "k-.", linewidth=h2o_lw, antialiased=False)
 
-        plt.xlabel("pH", fontname="Times New Roman", fontsize=18)
-        plt.ylabel("E (V)", fontname="Times New Roman", fontsize=18)
+        plt.xlabel(self._labels_map[self._analyzer._keys[0]], fontname="Times New Roman", fontsize=18)
+        plt.ylabel(self._labels_map[self._analyzer._keys[1]], fontname="Times New Roman", fontsize=18)
         plt.xticks(fontname="Times New Roman", fontsize=16)
         plt.yticks(fontname="Times New Roman", fontsize=16)
         plt.title(title, fontsize=20, fontweight='bold', fontname="Times New Roman")
