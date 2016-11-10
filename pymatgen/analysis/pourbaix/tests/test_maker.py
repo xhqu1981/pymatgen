@@ -50,13 +50,12 @@ class TestTDPourbaixDiagram(unittest.TestCase):
         self._pd = TDPourbaixDiagram(entries=td_entries,
                                      plot_type="T_pH",
                                      const_pot=3.0)
-        self.list_of_stable_entries = ["ZnHO[+]", "ZnO(s)", "Zn[2+]", "ZnO2(s)", "ZnHO2[-]", "ZnO2[2-]", "Zn(s)"]
+        self.list_of_stable_entries = {"ZnHO[+]", "Zn[2+]", "ZnO2(s)"}
 
     def test_td_pourbaix_diagram(self):
-        print("Number of factes:", len(self._pd.facets))
-        print("stable entries:")
-        for entry in self._pd.stable_entries:
-            print(entry.name)
+        self.assertEqual(len(self._pd.facets), 1, "Incorrect number of facets")
+        stable_entries_gened = set([entry.name for entry in self._pd.stable_entries])
+        self.assertEqual(self.list_of_stable_entries, stable_entries_gened, "Incorrect stable entries")
 
 
 if __name__ == '__main__':
