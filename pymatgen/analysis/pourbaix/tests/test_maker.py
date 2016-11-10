@@ -49,7 +49,7 @@ class TestTDPourbaixDiagram(unittest.TestCase):
         self._entries = td_entries
         self._pd = TDPourbaixDiagram(entries=td_entries,
                                      plot_type="T_pH",
-                                     const_pot=0.0)
+                                     const_pot=3.0)
         self.list_of_stable_entries = ["ZnHO[+]", "ZnO(s)", "Zn[2+]", "ZnO2(s)", "ZnHO2[-]", "ZnO2[2-]", "Zn(s)"]
 
     def test_td_pourbaix_diagram(self):
