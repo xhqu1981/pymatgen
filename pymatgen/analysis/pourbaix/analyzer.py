@@ -82,7 +82,8 @@ class PourbaixAnalyzer(object):
             simplices are the sides of the N-1 dim polytope bounding the
             allowable chemical potential range of each entry.
         """
-        limits = self.default_limits
+        if limits is None:
+            limits = self.default_limits
         tol = PourbaixAnalyzer.numerical_tol
 
         #  TODO: the all_chempots generation block doesn't have any effort, remove it.
