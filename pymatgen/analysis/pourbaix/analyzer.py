@@ -92,9 +92,9 @@ class PourbaixAnalyzer(object):
         facets = self._pd.facets
         for facet in facets:
             chempots = self.get_facet_chempots(facet)
-            chempots["H+"] /= -self._axis_coefficient[0]
-            chempots["V"] /= -self._axis_coefficient[1]
-            chempots["1"] = chempots["1"]
+            chempots[self._keys[0]] /= -self._axis_coefficient[0]
+            chempots[self._keys[1]] /= -self._axis_coefficient[1]
+            chempots[self._keys[2]] = chempots[self._keys[2]]
             all_chempots.append([chempots[el] for el in self._keys])
 
         basis_vecs = []
