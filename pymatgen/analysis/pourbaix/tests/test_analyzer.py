@@ -74,5 +74,13 @@ class TestTDPourbaixAnalyzer(unittest.TestCase):
                                     const_pot=3.0)
         self.analyzer = TDPourbaixAnalyzer(self.pd)
 
+    def test_get_facet_chempots(self):
+        range_map = self.analyzer.get_chempot_range_map()
+        range_map_dict = {}
+        for PourEntry in range_map.keys():
+            range_map_dict[PourEntry.name] = range_map[PourEntry]
+        for entry in self.num_simplices.keys():
+            self.assertEqual(len(range_map_dict[entry]), self.num_simplices[entry])
+
 if __name__ == '__main__':
     unittest.main()
