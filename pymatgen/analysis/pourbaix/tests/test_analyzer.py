@@ -53,7 +53,7 @@ class TestTDPourbaixAnalyzer(unittest.TestCase):
         module_dir = os.path.dirname(os.path.abspath(__file__))
         (elements, nontd_entries) = PourbaixEntryIO.from_csv(os.path.join(module_dir,
                                                              "test_entries.csv"))
-        self.num_simplices = {"Zn(s)": 7, "ZnO2(s)": 7, "Zn[2+]": 4, "ZnO2[2-]": 4, "ZnHO2[-]": 4}
+        self.num_simplices = {"Zn[2+]": 4, "ZnO(s)": 4, "ZnHO2[-]": 4, "ZnHO[+]": 7, "ZnO2[2-]": 4}
         self.e_above_hull_test = {"ZnHO[+]": 0.0693, "ZnO(aq)": 0.0624}
         self.decomp_test = {"ZnHO[+]": {"ZnO(s)": 0.5, "Zn[2+]": 0.5}, "ZnO(aq)": {"ZnO(s)": 1.0}}
         td_entries = []
@@ -79,9 +79,9 @@ class TestTDPourbaixAnalyzer(unittest.TestCase):
         range_map_dict = {}
         for PourEntry in range_map.keys():
             range_map_dict[PourEntry.name] = range_map[PourEntry]
-            print(PourEntry.name)
-        # for entry in self.num_simplices.keys():
-        #     self.assertEqual(len(range_map_dict[entry]), self.num_simplices[entry])
+        for entry in self.num_simplices.keys():
+            self.assertEqual(len(range_map_dict[entry]), self.num_simplices[entry])
+
 
 if __name__ == '__main__':
     unittest.main()
