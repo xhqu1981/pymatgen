@@ -54,8 +54,8 @@ class TestTDPourbaixAnalyzer(unittest.TestCase):
         (elements, nontd_entries) = PourbaixEntryIO.from_csv(os.path.join(module_dir,
                                                              "test_entries.csv"))
         self.num_simplices = {"Zn[2+]": 4, "ZnO(s)": 4, "ZnHO2[-]": 4, "ZnHO[+]": 7, "ZnO2[2-]": 4}
-        self.e_above_hull_test = {"ZnHO[+]": 0.0693, "ZnO(aq)": 0.0624}
-        self.decomp_test = {"ZnHO[+]": {"ZnO(s)": 0.5, "Zn[2+]": 0.5}, "ZnO(aq)": {"ZnO(s)": 1.0}}
+        self.e_above_hull_test = {'Zn(s)': 1.8816, 'ZnO(aq)': 0.0624, 'ZnO2(s)': 3.0756}
+        self.decomp_test = {'Zn(s)': {'Zn[2+]': 1.0}, 'ZnO(aq)': {'ZnO(s)': 1.0}, 'ZnO2(s)': {'ZnO2[2-]': 1.0}}
         td_entries = []
         for nontd_entry in nontd_entries:
             entropy = 0.0
@@ -81,6 +81,14 @@ class TestTDPourbaixAnalyzer(unittest.TestCase):
             range_map_dict[PourEntry.name] = range_map[PourEntry]
         for entry in self.num_simplices.keys():
             self.assertEqual(len(range_map_dict[entry]), self.num_simplices[entry])
+
+    def test_get_decomp(self):
+        for entry in [entry for entry in self.pd.all_entries if entry not in self.pd.stable_entries]:
+            decomp_entries = self.analyzer.get_decomposition(entry)
+            for entr in decomp_entries:
+                self.assertEqual(decomp_entries[entr], self.decomp_test[entry.name][entr.name])
+            e_above_hull = self.analyzer.get_e_above_hull(entry)
+            self.assertAlmostEqual(e_above_hull, self.e_above_hull_test[entry.name], 3)
 
 
 if __name__ == '__main__':
