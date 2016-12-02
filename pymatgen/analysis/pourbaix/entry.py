@@ -4,6 +4,8 @@
 
 from __future__ import division, unicode_literals
 
+import inspect
+import os
 import warnings
 
 from monty.dev import deprecated
@@ -472,17 +474,37 @@ class TDPourbaixEntry(PourbaixEntry):
         energy (float): Gibbs Free Energy of entry.
         entropy (float): Entropy of the entry. The enthalpy will be deduced
                          by substrating entropy contribution from Gibbs Free
-                         energy.
+                         energy. If set to None, will be automatically deduced
+                         according to compound type and composition.
         temperature (float): The temperature at which the Gibbs Free energy is evaluated.
         correction (float): Entry energy corrections.
     """
-    def __init__(self, entry, gibbs_energy, entropy, temperature, correction=0.0, entry_id=None):
-        enthalpy = gibbs_energy - (- temperature * entropy)
+    def __init__(self, entry, gibbs_energy, entropy=None, temperature=298.0, correction=0.0, entry_id=None):
+        self.entropy = entropy if entropy is not None else self.get_form_entropy(entry)
+        enthalpy = gibbs_energy - (- temperature * self.entropy)
         entry.energy = enthalpy
         super(TDPourbaixEntry, self).__init__(entry=entry, correction=correction, entry_id=entry_id)
-        self.entropy = entropy
         self.temperature = temperature
         self.enthalpy = enthalpy
+
+    @staticmethod
+    def get_form_entropy(entry):
+        from pymatgen.entries.compatibility import AqueousCorrection
+        gas_entropy_file_path = os.path.join(os.path.dirname(os.path.abspath(
+            inspect.getfile(AqueousCorrection))),
+            "MPCompatibility.yaml")
+        mp_ac = AqueousCorrection(gas_entropy_file_path)
+        if isinstance(entry, IonEntry):
+            # ion
+            entropy = 1
+            raise Exception("not implemented yet")
+        else:
+            # solid
+            assert entry.composition.charge == 0
+            nO = entry.composition["O"]
+            o_atomic_entroy = mp_ac.cpd_energies["O2"] / 298.0
+            entropy = - nO * o_atomic_entroy
+            return entropy
 
     @property
     def energy(self):
