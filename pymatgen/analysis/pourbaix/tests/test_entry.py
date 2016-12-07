@@ -190,6 +190,10 @@ class TestTDPourbaixEntry(unittest.TestCase):
         self.assertEqual(self.tdPxSol.g0, 45, "Wrong Energy!")
         self.assertEqual(self.tdPxIon.conc, 1e-4, "Wrong concentration!")
 
+    def test_solid_entropy(self):
+        altTdPxSol = TDPourbaixEntry(self.solentry, gibbs_energy=45, temperature=298.15)
+        print("solid ne is", altTdPxSol.entropy)
+
     def test_scale(self):
         se2 = copy.deepcopy(self.tdPxSol)
         se2.scale(1.0/se2.nM)
