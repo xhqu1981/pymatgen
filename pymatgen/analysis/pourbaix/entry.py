@@ -501,7 +501,7 @@ class TDPourbaixEntry(PourbaixEntry):
         else:
             # solid
             nO = entry.composition["O"]
-            o_atomic_entroy = -mp_ac.cpd_energies["O2"] / 298.0
+            o_atomic_entroy = -mp_ac.cpd_energies["O2"] / 298.15
             entropy = - nO * o_atomic_entroy
             return entropy
 
