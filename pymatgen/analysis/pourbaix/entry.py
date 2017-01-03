@@ -482,7 +482,12 @@ class TDPourbaixEntry(PourbaixEntry):
     def __init__(self, entry, gibbs_energy, entropy=None, temperature=298.0, correction=0.0, entry_id=None):
         self.entropy = entropy if entropy is not None else self.get_form_entropy(entry)
         enthalpy = gibbs_energy - (- temperature * self.entropy)
-        entry.energy = enthalpy
+        from pymatgen.entries.computed_entries import ComputedEntry
+        if not isinstance(entry, ComputedEntry):
+            entry.energy = enthalpy
+        else:
+            entry.uncorrected_energy = enthalpy
+            entry.correction = 0.0
         super(TDPourbaixEntry, self).__init__(entry=entry, correction=correction, entry_id=entry_id)
         self.temperature = temperature
         self.enthalpy = enthalpy
